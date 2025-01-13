@@ -1,22 +1,15 @@
 {
   "name": "netatmo",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A weather display web application for presenting temperature information gathered by locally installed Netatmo weather sensors.",
-  "main": "gulpfile.js",
+  "main": "build-svg.js",
   "devDependencies": {
-    "gulp": "^4.0.2",
-    "gulp-cheerio": "^1.0.0",
-    "gulp-rename": "^1.4.0",
-    "gulp-svgmin": "^4.1.0",
-    "gulp-svgstore": "^7.0.1",
-    "path": "^0.12.7"
-  },
-  "overrides": {
-    "glob-parent": ">=5.1.2",
-		"nth-check": ">=2.0.1"
+    "svgstore": "^3.0.0",
+    "xml-js": "^1.6.11"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:svg": "node build-svg.js"
   },
   "repository": {
     "type": "git",
