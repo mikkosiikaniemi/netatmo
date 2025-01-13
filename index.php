@@ -1,65 +1,12 @@
 <?php
+require_once 'config.php';
+require_once 'functions.php';
 
-/**
- * A weather display web application for presenting temperature information
- * gathered by locally installed Netatmo weather sensors.
- *
- * @author Mikko Siikaniemi / Mikrogramma Design
- * @link https://github.com/mikkosiikaniemi/netatmo-weather-display
- */
+// Check if the user is logged in
+$logged_in = isset($_SESSION['access_token']) && time() < $_SESSION['expires_at'];
 
-require 'vendor/autoload.php';
-
-// Start a PHP session to store the Netatmo API access token and such.
-session_start();
-
-// Check if the obligatory configuration file exists.
-if ( false === file_exists( 'config.php' ) ) {
-	die( 'Konfiguraatiotiedostoa ei ole olemassa.' );
-} else {
-	// Initialize helper functions
-	require_once 'netatmo.php';
-}
-
-// If user chose to log out
-if ( isset( $_POST['logout'] ) ) {
-	logout_netatmo();
-}
-
-global $provider;
-
-$provider = new \Rugaard\OAuth2\Client\Netatmo\Provider\Netatmo(
-	array(
-		'clientId'     => CLIENT_ID,
-		'clientSecret' => CLIENT_SECRET,
-		'redirectUri'  => LOCAL_URL,
-	)
-);
-
-
-// If there is no authorization code from Netatmo, or if the session has not been started
-if ( ! isset( $_GET['code'] ) || ! isset( $_SESSION ) ) {
-	login_netatmo();
-}
-
-if ( isset( $_SESSION['state'] ) ) {
-
-	if ( ! isset( $_SESSION['access_token'] ) ) {
-		get_access_token();
-	}
-
-	if ( isset( $_SESSION['token_expires'] ) && time() > $_SESSION['token_expires'] ) {
-		refresh_token();
-	}
-} else {
-	echo '<p>Istunnon tila ei täsmää. <a href="' . basename( $_SERVER['PHP_SELF'] ) . '">Kirjaudu uudelleen.</a></p>';
-	?>
-	<script>
-	setTimeout( "location.href = '<?php echo basename( $_SERVER['PHP_SELF'] ); ?>';",3000);
-	</script>
-	<?php
-	die();
-}
+// Define automatic update interval
+DEFINE( 'NETATMO_UPDATE_INTERVAL', 10.5 * 60 );
 
 ?>
 <!doctype html>
@@ -76,7 +23,7 @@ if ( isset( $_SESSION['state'] ) ) {
 </head>
 
 <body class="dark-mode">
-
+<?php if ($logged_in): ?>
 	<div id="date-and-time" class="date-and-time padded">
 		<span id="date">Haetaan päiväystä...</span>
 		<div id="actions">
@@ -97,11 +44,11 @@ if ( isset( $_SESSION['state'] ) ) {
 			</button>
 			<form action="<?php echo basename( $_SERVER['PHP_SELF'] ); ?>" method="post">
 				<input type="hidden" name="logout" value="true" />
-				<button type="submit" aria-label="Kirjaudu ulos">
+				<a class="button" aria-label="Kirjaudu ulos" href="logout.php">
 					<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="icon-stroked feather feather-log-out" viewBox="0 0 24 24">
 						<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4m7 14 5-5-5-5m5 5H9"/>
 					</svg>
-				</button>
+				</a>
 			</form>
 		</div>
 		<span id="time">...</span>
@@ -114,7 +61,7 @@ if ( isset( $_SESSION['state'] ) ) {
 	<div class="sunrise-sunset">
 		<?php
 			date_default_timezone_set( 'Europe/Helsinki' );
-			$sun_info        = date_sun_info( time(), LATITUDE, LONGITUDE );
+			$sun_info        = date_sun_info( time(), $_ENV['LATITUDE'], $_ENV['LONGITUDE'] );
 			$sunrise         = $sun_info['sunrise'];
 			$sunset          = $sun_info['sunset'];
 			$sunrise_minutes = date( 'H', $sunrise ) * 60 + date( 'i', $sunrise );
@@ -133,7 +80,7 @@ if ( isset( $_SESSION['state'] ) ) {
 	</div>
 
 	<div id="temperatures-and-forecast">
-		<?php	echo print_temperatures(); ?>
+		<?php require 'get_weather.php'; ?>
 	</div>
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.3/jquery.min.js" integrity="sha256-YcbK69I5IXQftf/mYD8WY0/KmEDCv1asggHpJk1trM8=" crossorigin="anonymous"></script>
@@ -147,5 +94,8 @@ if ( isset( $_SESSION['state'] ) ) {
 		};
 	</script>
 	<script src="netatmo.js?ver=<?php echo filemtime( 'netatmo.js' ); ?>"></script>
+	<?php else: ?>
+    <p><a href="auth.php">Kirjaudu sisään</a> nähdäksesi tiedot.</p>
+  <?php endif; ?>
 </body>
 </html>

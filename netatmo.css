@@ -80,9 +80,9 @@ td {
 html {
 	font-size: 62.5%;
 	line-height: 1.15;
-	/* 1 */
-	-webkit-text-size-adjust: 100%;
-	/* 2 */
+  -moz-text-size-adjust: none;
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
 }
 
 body {
@@ -109,7 +109,6 @@ body.dark-mode {
 a,
 a:visited {
 	color: inherit;
-	text-decoration: none;
 }
 
 code,
@@ -135,7 +134,7 @@ p {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	font-size: 300%;
+	font-size: 4.5rem;
 	text-align: justify;
 	font-weight: 100;
 	text-align: initial;
@@ -338,7 +337,8 @@ form {
 	display: inline-block;
 }
 
-button {
+button,
+.button {
 	-webkit-appearance: button;
 	border: 0;
 	padding: 1rem;
@@ -354,13 +354,16 @@ button {
 	height: 4rem;
 	transition: background-color 100ms ease-in-out;
 	color: #666;
+	display: inline-block;
 }
 
-button:hover {
+button:hover,
+.button:hover {
 	background-color: hsla(0, 0%, 20%, 0.2);
 }
 
-#actions button {
+#actions button,
+#actions .button {
 	transform: translateY(-0.5rem);
 }
 
@@ -381,7 +384,8 @@ button:hover {
 	animation-iteration-count: infinite;
 }
 
-.dark-mode button {
+.dark-mode button,
+.dark-mode .button {
 	color: #666;
 }
 
